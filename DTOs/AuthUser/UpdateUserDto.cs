@@ -1,11 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-
-namespace FinalSurvey.DTOs
+﻿namespace FinalSurvey.DTOs.AuthUser
 {
-    public class UserRegisterDto
+    public class UpdateUserDto
     {
-
         public string Name { get; set; } = null!;
 
         public string FirstSurname { get; set; } = null!;
@@ -17,6 +13,5 @@ namespace FinalSurvey.DTOs
         public byte[]? Photo { get; set; }
 
         public bool? Status { get; set; }
-
     }
 }

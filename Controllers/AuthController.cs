@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using FinalSurvey.Data;
 using FinalSurvey.Models;
 using FinalSurvey.Services.AuthService;
-using FinalSurvey.DTOs;
+using FinalSurvey.DTOs.AuthUser;
 
 namespace FinalSurvey.Controllers
 {
@@ -59,33 +59,6 @@ namespace FinalSurvey.Controllers
             return Ok(response);
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // GET: api/Auth
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
@@ -107,47 +80,69 @@ namespace FinalSurvey.Controllers
             return user;
         }
 
-        // PUT: api/Auth/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public async Task<ActionResult<ServiceResponse<IEnumerable<GetUserDto>>>> PutUser(UpdateUserDto updateUser, int id)
         {
-            if (id != user.IdUser)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
+            var response = await _authService.UpdateUser(
+                new User
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                    Name = updateUser.Name,
+                    FirstSurname = updateUser.FirstSurname,
+                    LastSurname = updateUser.LastSurname,
+                    Status = updateUser.Status,
+                    Photo = updateUser.Photo,
+                }, updateUser.Password, id
+                );
 
-            return NoContent();
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
+
+        //// PUT: api/Auth/5
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutUser(int id, User user)
+        //{
+        //    if (id != user.IdUser)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    _context.Entry(user).State = EntityState.Modified;
+
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!UserExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
+
+        //    return NoContent();
+        //}
 
         // POST: api/Auth
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
-            _context.User.Add(user);
-            await _context.SaveChangesAsync();
+        //[HttpPost]
+        //public async Task<ActionResult<User>> PostUser(User user)
+        //{
+        //    _context.User.Add(user);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.IdUser }, user);
-        }
+        //    return CreatedAtAction("GetUser", new { id = user.IdUser }, user);
+        //}
 
         // DELETE: api/Auth/5
         [HttpDelete("{id}")]

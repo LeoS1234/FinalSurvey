@@ -30,6 +30,10 @@ builder.Services.AddSwaggerGen(c => {
 });
 
 
+//IMPLEMENTACION DEL MAPEO DE OBJETOS
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+
 //AUTENTICACION DEL TOKEN
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {

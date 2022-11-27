@@ -1,4 +1,6 @@
-﻿using FinalSurvey.Data;
+﻿using AutoMapper;
+using FinalSurvey.Data;
+using FinalSurvey.DTOs.AuthUser;
 using FinalSurvey.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,11 +15,13 @@ namespace FinalSurvey.Services.AuthService
     {
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public AuthService(DataContext context, IConfiguration configuration)
+        public AuthService(DataContext context, IConfiguration configuration, IMapper mapper)
         {
             _context = context;
             _configuration = configuration;
+            _mapper = mapper;
 
         }
 
@@ -67,16 +71,74 @@ namespace FinalSurvey.Services.AuthService
 
             return response;
         }
+        //public async Task<ServiceResponse<GetUserDto>> UpdateUser(User user, string password, int id)
+        //{
+        //    ServiceResponse<GetUserDto> response = new ServiceResponse<GetUserDto>();
 
-        public async Task<bool> UserExist(string username)
+        //    try
+        //    {
+        //        if (await UserIdExist(id))
+        //        {
+        //            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+
+        //            user.PasswordHash = passwordHash;
+        //            user.PasswordSalt = passwordSalt;
+        //            user.IdUser = id;
+
+        //            _context.Entry(user).State = EntityState.Modified;
+
+        //            await _context.SaveChangesAsync();
+        //            response.Data = _mapper.Map<GetUserDto>(user);
+        //        }
+        //        else
+        //        {
+        //            response.Success = false;
+        //            response.Message = "USER NOT FOUND";
+        //        }
+        //    }
+        //    catch (DbUpdateException ex)
+        //    {
+        //        response.Success = false;
+        //        response.Message = ex.Message;
+        //    }
+        //    return response;
+        //}
+
+        public async Task<ServiceResponse<GetUserDto>> UpdateUser(User user, string password, int id)
         {
-            if (await _context.User.AnyAsync(c => c.Name.ToLower() == username.ToLower()))
-            {
-                return true;
-            }
-            return false;
+            ServiceResponse<GetUserDto> response = new ServiceResponse<GetUserDto>();
 
+            try
+            {
+                if (await UserIdExist(id))
+                {
+                    CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                    user.PasswordHash = passwordHash;
+                    user.PasswordSalt = passwordSalt;
+                    user.IdUser = id;
+
+                    _context.Entry(user).State = EntityState.Modified;
+
+                    await _context.SaveChangesAsync();
+                    response.Data = _mapper.Map<GetUserDto>(user);
+                }
+                else
+                {
+                    response.Success = false;
+                    response.Message = "USER NOT FOUND";
+                }
+            }
+            catch (DbUpdateException ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
         }
+
+ 
+
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA256())
@@ -123,6 +185,27 @@ namespace FinalSurvey.Services.AuthService
 
             return tokenHandler.WriteToken(token);
         }
+
+        public async Task<bool> UserExist(string username)
+        {
+            if (await _context.User.AnyAsync(c => c.Name.ToLower() == username.ToLower()))
+            {
+                return true;
+            }
+            return false;
+
+        }
+
+        public async Task<bool> UserIdExist(int id)
+        {
+            if (await _context.User.AnyAsync(u => u.IdUser.Equals(id)))
+            {
+                return true;
+
+            }
+            return false;
+        }
+
     }
 
 }
