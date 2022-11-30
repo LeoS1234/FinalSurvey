@@ -11,7 +11,7 @@ public partial class User
 {
     [Key]
 
-    public int IdUser { get; set; }
+    public Guid IdUser { get; set; }
 
     [StringLength(50)]
     [Unicode(false)]
@@ -35,4 +35,6 @@ public partial class User
 
     [InverseProperty("User")]
     public virtual ICollection<UserAnswer> UserAnswers { get; } = new List<UserAnswer>();
+
+    public List<Role>? Roles { get; set; }
 }

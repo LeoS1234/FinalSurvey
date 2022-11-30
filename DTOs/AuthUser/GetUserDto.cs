@@ -5,7 +5,7 @@ namespace FinalSurvey.DTOs.AuthUser
 {
     public class GetUserDto
     {
-        public int IdUser { get; set; }
+        public Guid IdUser { get; set; }
 
         public string Name { get; set; } = null!;
 

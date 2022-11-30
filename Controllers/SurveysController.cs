@@ -13,6 +13,8 @@ using FinalSurvey.DTOs.Role;
 using FinalSurvey.DTOs.QuestionAnswer;
 using FinalSurvey.DTOs.Survey;
 using FinalSurvey.DTOs.Category;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace FinalSurvey.Controllers
 {
@@ -104,7 +106,7 @@ namespace FinalSurvey.Controllers
 
         // POST: api/Surveys
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "admin")]
         public async Task<ActionResult<ServiceResponse<IEnumerable<GetSurveyDto>>>> PostSurvey(AddSurveyDto survey)
         {
             var response = new ServiceResponse<IEnumerable<GetSurveyDto>>();
@@ -122,7 +124,7 @@ namespace FinalSurvey.Controllers
         }
 
         // DELETE: api/Surveys/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Roles = "admin")]
         public async Task<ActionResult<ServiceResponse<IEnumerable<GetSurveyDto>>>> DeleteSurvey(int id)
         {
             ServiceResponse<IEnumerable<GetSurveyDto>> response = new ServiceResponse<IEnumerable<GetSurveyDto>>();

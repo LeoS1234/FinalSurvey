@@ -25,10 +25,12 @@ namespace FinalSurvey.Services.AuthService
 
         }
 
+        public IConfiguration Configuration { get; }
+
         public async Task<ServiceResponse<string>> Login(string username, string password)
         {
             var response = new ServiceResponse<string>();
-            var user = await _context.User
+            var user = await _context.User.Include(r => r.Roles)
                 .FirstOrDefaultAsync(c => c.Name.ToLower().Equals(username.ToLower()));
 
             if (username == null)
@@ -49,9 +51,9 @@ namespace FinalSurvey.Services.AuthService
             return response;
         }
 
-        public async Task<ServiceResponse<int>> Register(User user, string password)
+        public async Task<ServiceResponse<string>> Register(User user, string password)
         {
-            ServiceResponse<int> response = new ServiceResponse<int>();
+            ServiceResponse<string> response = new ServiceResponse<string>();
             if (await UserExist(user.Name))
             {
                 response.Success = false;
@@ -67,44 +69,12 @@ namespace FinalSurvey.Services.AuthService
             _context.User.Add(user);
 
             await _context.SaveChangesAsync();
-            response.Data = user.IdUser;
+            response.Data = user.IdUser.ToString();
 
             return response;
         }
-        //public async Task<ServiceResponse<GetUserDto>> UpdateUser(User user, string password, int id)
-        //{
-        //    ServiceResponse<GetUserDto> response = new ServiceResponse<GetUserDto>();
-
-        //    try
-        //    {
-        //        if (await UserIdExist(id))
-        //        {
-        //            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
-
-        //            user.PasswordHash = passwordHash;
-        //            user.PasswordSalt = passwordSalt;
-        //            user.IdUser = id;
-
-        //            _context.Entry(user).State = EntityState.Modified;
-
-        //            await _context.SaveChangesAsync();
-        //            response.Data = _mapper.Map<GetUserDto>(user);
-        //        }
-        //        else
-        //        {
-        //            response.Success = false;
-        //            response.Message = "USER NOT FOUND";
-        //        }
-        //    }
-        //    catch (DbUpdateException ex)
-        //    {
-        //        response.Success = false;
-        //        response.Message = ex.Message;
-        //    }
-        //    return response;
-        //}
-
-        public async Task<ServiceResponse<GetUserDto>> UpdateUser(User user, string password, int id)
+  
+        public async Task<ServiceResponse<GetUserDto>> UpdateUser(User user, string password, Guid id)
         {
             ServiceResponse<GetUserDto> response = new ServiceResponse<GetUserDto>();
 
@@ -137,8 +107,6 @@ namespace FinalSurvey.Services.AuthService
             return response;
         }
 
- 
-
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA256())
@@ -169,6 +137,12 @@ namespace FinalSurvey.Services.AuthService
                 //new Claim(ClaimTypes.Role, consumer.Role)
             };
 
+            foreach (var role in user.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.Name));
+            }
+
+
             SymmetricSecurityKey key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
                 .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
 
@@ -196,7 +170,7 @@ namespace FinalSurvey.Services.AuthService
 
         }
 
-        public async Task<bool> UserIdExist(int id)
+        public async Task<bool> UserIdExist(Guid id)
         {
             if (await _context.User.AnyAsync(u => u.IdUser.Equals(id)))
             {

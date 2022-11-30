@@ -7,7 +7,7 @@ namespace FinalSurvey.DTOs.Question
     {
         public Guid IdQuestion { get; set; }
 
-        public string QuestonTxt { get; set; } = null!;
+        public string QuestionTxt { get; set; } = null!;
 
         public string QuestionType { get; set; } = null!;
 
